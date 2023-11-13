@@ -43,27 +43,63 @@ async function run() {
         /* Working Zone Start */
         // Collections
         const usersCollection = client.db("jashoreFoodiesDB").collection("users");
-        
+        const restaurantsCollection = client.db("jashoreFoodiesDB").collection("restaurants");
+        const adminsCollection = client.db("jashoreFoodiesDB").collection("admins");
+
         // JWT Token
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             res.send({ token })
         })
+        /* Common API*/
+        app.get('/role/:email', async (req, res) => {
+            const email = req?.params?.email;
+            const query = { email: email }
+            const restaurant = await restaurantsCollection.findOne(query);
+            const user = await usersCollection.findOne(query);
+            const admin = await adminsCollection.findOne(query);
+            const result = { isCustomer: user?.role === 'customer', isAdmin: admin?.role === 'admin', isRestaurant: restaurant?.role === 'restaurant' }
+            res.send(result);
+        })
 
-        // Common Zone
+        /* Customer Related API*/
         app.post('/users', async (req, res) => {
             const user = req.body;
             const query = { email: user.email }
             const exists = await usersCollection.findOne(query);
-
             if (exists) {
                 return res.send({ message: 'already exists' })
             }
-
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
+
+        /* Restaurant Related API */
+        // Restaurant register
+        app.post('/restaurants', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
+            const exists = await restaurantsCollection.findOne(query);
+            if (exists) {
+                return res.send({ message: 'already exists' })
+            }
+            const result = await restaurantsCollection.insertOne(user);
+            res.send(result);
+        });
+
+        /* Admin Related Api */
+        app.get('/pendingrestaurnt', async(req, res)=>{
+            const query = {status: "pending"}
+            const result = await restaurantsCollection.find(query).toArray();
+            // console.log(result)
+            res.send(result)
+        })
+        app.post('/adminfeedback', async(req, res)=>{
+            const query = {status: "pending"}
+            const result = await restaurantsCollection.find(query).toArray();
+            res.send(result)
+        })
         /* Working Zone End */
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
