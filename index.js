@@ -88,6 +88,14 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/isrestaurantapproved/:email', async(req, res)=>{
+            const email = req?.params?.email;
+            const query = { email: email }
+            const restaurant = await restaurantsCollection.findOne(query);
+            const result = restaurant?.status === 'approved'
+            res.send(result);
+        })
+
         /* Admin Related Api */
         app.get('/pendingrestaurnt', async(req, res)=>{
             const query = {status: "pending"}
