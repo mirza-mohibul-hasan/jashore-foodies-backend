@@ -95,10 +95,24 @@ async function run() {
             // console.log(result)
             res.send(result)
         })
-        app.post('/adminfeedback', async(req, res)=>{
+        app.put('/pendingrestaurnt', async(req, res)=>{
             const query = {status: "pending"}
             const result = await restaurantsCollection.find(query).toArray();
+            // console.log(result)
             res.send(result)
+        })
+        // app.post('/adminfeedback', async(req, res)=>{
+        //     const query = {status: "pending"}
+        //     const result = await restaurantsCollection.find(query).toArray();
+        //     res.send(result)
+        // })
+
+        // Home page info
+        app.get('/adminhomeinfo', async(req, res)=>{
+            const query = {status: "pending"}
+            const result = await restaurantsCollection.find(query).toArray();
+            const info = {newreq:result.length}
+            res.send(info)
         })
         /* Working Zone End */
         // Send a ping to confirm a successful connection
