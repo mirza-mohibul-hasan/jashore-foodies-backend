@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 3000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // Middleware
 app.use(cors());
@@ -44,7 +44,10 @@ async function run() {
         // Collections
         const usersCollection = client.db("jashoreFoodiesDB").collection("users");
         const restaurantsCollection = client.db("jashoreFoodiesDB").collection("restaurants");
+        const restaurantFeedbackCollection = client.db("jashoreFoodiesDB").collection("authorityrestaurantfeedback");
         const adminsCollection = client.db("jashoreFoodiesDB").collection("admins");
+        // Restaurant
+        const itemsCollection = client.db("jashoreFoodiesDB").collection("fooditems");
 
         // JWT Token
         app.post('/jwt', (req, res) => {
@@ -87,27 +90,45 @@ async function run() {
             const result = await restaurantsCollection.insertOne(user);
             res.send(result);
         });
-
-        app.get('/isrestaurantapproved/:email', async(req, res)=>{
+        // check restaurant approval
+        app.get('/isrestaurantapproved/:email', async (req, res) => {
             const email = req?.params?.email;
             const query = { email: email }
             const restaurant = await restaurantsCollection.findOne(query);
             const result = restaurant?.status === 'approved'
             res.send(result);
         })
-
+        // Add New Item
+        app.post("/additem", async(req, res)=>{
+            const newItem = req.body;
+            const result = await itemsCollection.insertOne(newItem)
+            res.send(result)
+            // console.log(newItem);
+        })
         /* Admin Related Api */
-        app.get('/pendingrestaurnt', async(req, res)=>{
-            const query = {status: "pending"}
+        app.get('/pendingrestaurnt', async (req, res) => {
+            const query = { status: "pending" }
             const result = await restaurantsCollection.find(query).toArray();
             // console.log(result)
             res.send(result)
         })
-        app.put('/pendingrestaurnt', async(req, res)=>{
-            const query = {status: "pending"}
-            const result = await restaurantsCollection.find(query).toArray();
-            // console.log(result)
-            res.send(result)
+        app.post('/approverestaurant/:id', async (req, res) => {
+            const id = req.params.id;
+            const message = req.body.message;
+            const newfeedback = { restaurantId: id, message }
+            const query = { _id: new ObjectId(id) }
+
+            const feedback = await restaurantFeedbackCollection.insertOne(newfeedback)
+            const updateDoc = {
+                $set: {
+                    status: "approved"
+                },
+            };
+            const restaurant = await restaurantsCollection.updateOne(query, updateDoc)
+            const acknowledged = { acknowledged: feedback.acknowledged && restaurant.acknowledged }
+            console.log(acknowledged)
+            res.send (acknowledged);
+
         })
         // app.post('/adminfeedback', async(req, res)=>{
         //     const query = {status: "pending"}
@@ -116,10 +137,10 @@ async function run() {
         // })
 
         // Home page info
-        app.get('/adminhomeinfo', async(req, res)=>{
-            const query = {status: "pending"}
+        app.get('/adminhomeinfo', async (req, res) => {
+            const query = { status: "pending" }
             const result = await restaurantsCollection.find(query).toArray();
-            const info = {newreq:result.length}
+            const info = { newreq: result.length }
             res.send(info)
         })
         /* Working Zone End */
