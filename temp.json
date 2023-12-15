@@ -1,0 +1,63 @@
+[
+    {
+      "length": "4.0",
+      "width": "3.8",
+      "price": "60.00",
+      "capacity": "4",
+      "description": "Experience a romantic evening at our cozy table for two, surrounded by the warm ambiance of our restaurant. Perfect for creating lasting memories with your loved one.",
+      "photo": "https://www.juliettesinteriors.co.uk/wp-content/uploads/2022/05/round-marble-dining-table-and-chairs-set-5.jpg",
+      "shape": "round",
+      "availability": true,
+      "restaurantName": "Cafe Test",
+      "restaurantEmail": "cafetest@gmail.com"
+    },
+    {
+      "length": "7.2",
+      "width": "3.2",
+      "price": "90",
+      "capacity": "6",
+      "description": "A charming spot for a tête-à-tête, this two-person table offers a blend of comfort and style. Enjoy a delightful meal with your special someone in our welcoming environment.",
+      "photo": "https://cdnimg.webstaurantstore.com/uploads/seo_category/2019/5/table-dining-sets.jpg",
+      "shape": "rectangle",
+      "availability": true,
+      "restaurantName": "Cafe Test",
+      "restaurantEmail": "cafetest@gmail.com"
+    },
+    {
+      "length": "13.8",
+      "width": "13.8",
+      "price": "55",
+      "capacity": "22",
+      "description": "Indulge in the intimacy of our square-shaped two-person table. The soft lighting creates a perfect atmosphere for a romantic dinner or a quiet conversation.",
+      "photo": "https://i.pinimg.com/originals/b0/d8/ef/b0d8ef1622fd4eba40698c46563c8316.jpg",
+      "shape": "round",
+      "availability": true,
+      "restaurantName": "Cafe Test",
+      "restaurantEmail": "cafetest@gmail.com"
+    },
+    {
+      "length": "4.5",
+      "width": "3.0",
+      "price": "75",
+      "capacity": "2",
+      "description": "Elevate your dining experience with our rectangular two-person table. Immerse yourself in the culinary delights of our restaurant while enjoying each other's company.",
+      "photo": "https://example.com/table4.jpg",
+      "shape": "rectangle",
+      "availability": true,
+      "restaurantName": "Cafe Test",
+      "restaurantEmail": "cafetest@gmail.com"
+    },
+    {
+      "length": "12.5",
+      "width": "8.0",
+      "price": "300",
+      "capacity": "12",
+      "description": "Discover the magic of our uniquely shaped two-person table. Surrounded by a blend of modern and rustic elements, it's the perfect setting for a special dining experience.",
+      "photo": "https://haveaseat.com.au/wp-content/uploads/2022/05/image-008-1000x510.jpg",
+      "shape": "booth",
+      "availability": true,
+      "restaurantName": "Cafe Test",
+      "restaurantEmail": "cafetest@gmail.com"
+    }
+  ]
+  

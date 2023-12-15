@@ -48,6 +48,7 @@ async function run() {
         const adminsCollection = client.db("jashoreFoodiesDB").collection("admins");
         // Restaurant
         const itemsCollection = client.db("jashoreFoodiesDB").collection("fooditems");
+        const tableCollection = client.db("jashoreFoodiesDB").collection("restauranttables");
 
         // JWT Token
         app.post('/jwt', (req, res) => {
@@ -63,6 +64,22 @@ async function run() {
             const user = await usersCollection.findOne(query);
             const admin = await adminsCollection.findOne(query);
             const result = { isCustomer: user?.role === 'customer', isAdmin: admin?.role === 'admin', isRestaurant: restaurant?.role === 'restaurant' }
+            res.send(result);
+        })
+        // Table Reservation Page
+        app.get("/tablereservation", async (req, res) => {
+            const result = await tableCollection.find().toArray()
+            res.send(result)
+        })
+        // restaurantdetails
+        app.get("/restaurantdetails/:email", async (req, res) => {
+            const email = req.params.email;
+            const result = await restaurantsCollection.findOne({ email: email })
+            res.send(result);
+        })
+        app.get("/restaurantdetailswi/:restaurantId", async (req, res) => {
+            const restaurantId = req.params.restaurantId;
+            const result = await restaurantsCollection.findOne({ _id: new ObjectId(restaurantId) })
             res.send(result);
         })
 
@@ -99,7 +116,14 @@ async function run() {
             res.send(result);
         })
         // Add New Item
-        app.post("/additem", async(req, res)=>{
+        app.post("/addtable", async (req, res) => {
+            const newTable = req.body;
+            const result = await tableCollection.insertOne(newTable)
+            res.send(result)
+            // console.log(newTable);
+        })
+        // Add New item
+        app.post("/additem", async (req, res) => {
             const newItem = req.body;
             const result = await itemsCollection.insertOne(newItem)
             res.send(result)
@@ -127,7 +151,7 @@ async function run() {
             const restaurant = await restaurantsCollection.updateOne(query, updateDoc)
             const acknowledged = { acknowledged: feedback.acknowledged && restaurant.acknowledged }
             console.log(acknowledged)
-            res.send (acknowledged);
+            res.send(acknowledged);
 
         })
         // app.post('/adminfeedback', async(req, res)=>{
