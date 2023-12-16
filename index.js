@@ -5,7 +5,11 @@ require("dotenv").config();
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-
+// SSL
+const SSLCommerzPayment = require('sslcommerz-lts')
+const store_id = process.env.STORE_ID;
+const store_passwd = process.env.STORE_PASS;
+const is_live = false //true for live, false for sandbox
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -49,6 +53,9 @@ async function run() {
         // Restaurant
         const itemsCollection = client.db("jashoreFoodiesDB").collection("fooditems");
         const tableCollection = client.db("jashoreFoodiesDB").collection("restauranttables");
+
+        // Payments
+        const reservationspaymentsCollection = client.db("jashoreFoodiesDB").collection("reservationspayments");
 
         // JWT Token
         app.post('/jwt', (req, res) => {
@@ -187,6 +194,88 @@ async function run() {
             const result = await restaurantsCollection.find(query).toArray();
             const info = { newreq: result.length }
             res.send(info)
+        })
+        /* SSL Commerz */
+        // For Table Reservations
+        const tran_id = new ObjectId().toString();
+        app.post("/reservepayment", async (req, res) => {
+            // console.log(req.body);
+            const info = req.body;
+            const table = info.table;
+            table.price = parseFloat(table.price)
+            const customer = info.customer;
+            const data = {
+                total_amount: (table?.price * .50).toFixed(2),
+                currency: info.currency,
+                tran_id: tran_id, // use unique tran_id for each api call
+                success_url: `http://localhost:3000/reservationpayment/success/${tran_id}`,
+                fail_url: `http://localhost:3000/reservationpayment/failed/${tran_id}`,
+                cancel_url: 'http://localhost:3030/cancel',
+                ipn_url: 'http://localhost:3030/ipn',
+                shipping_method: 'Courier',
+                product_name: 'Restaurant Table.',
+                product_category: table.shape,
+                product_profile: 'general',
+                cus_name: info.name,
+                cus_email: customer.email,
+                cus_add1: info.address,
+                cus_add2: 'Dhaka',
+                cus_city: 'Dhaka',
+                cus_state: 'Dhaka',
+                cus_postcode: info.postcode,
+                cus_country: 'Bangladesh',
+                cus_phone: info.phone,
+                cus_fax: '01711111111',
+                ship_name: 'Customer Name',
+                ship_add1: 'Dhaka',
+                ship_add2: 'Dhaka',
+                ship_city: 'Dhaka',
+                ship_state: 'Dhaka',
+                ship_postcode: 1000,
+                ship_country: 'Bangladesh',
+            };
+            // console.log(data);
+            const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+            sslcz.init(data).then(apiResponse => {
+                // Redirect the user to payment gateway
+                let GatewayPageURL = apiResponse.GatewayPageURL
+                // res.redirect(GatewayPageURL)
+                res.send({ url: GatewayPageURL });
+
+                // Transaction Info for user
+                const paymentInfo = {
+                    paymentStatus: false,
+                    amount: parseFloat(table?.price) * .50.toFixed(2),
+                    transactionId: tran_id,
+                    tableId: table._id,
+                    restaurantEmail: table.restaurantEmail,
+                    restaurantName: table.restaurantName,
+                    customerId: customer._id,
+                    customerEmail: customer.email,
+                    customerName: customer.name
+                }
+                const result = reservationspaymentsCollection.insertOne(paymentInfo)
+
+                console.log('Redirecting to: ', GatewayPageURL)
+            });
+            app.post("/reservationpayment/success/:tranId", async (req, res) => {
+                // console.log(req.params.tranId);
+                const result = await reservationspaymentsCollection.updateOne({ transactionId: req.params.tranId }, {
+                    $set: {
+                        paymentStatus: true
+                    }
+                })
+                if (result.modifiedCount > 0) {
+                    res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
+                }
+            })
+            app.post("/reservationpayment/failed/:tranId", async (req, res) => {
+                // console.log(req.params.tranId);
+                const result = await reservationspaymentsCollection.deleteOne({ transactionId: req.params.tranId })
+                if (result.deletedCount > 0) {
+                    res.redirect(`http://localhost:5173/payment/failed/${req.params.tranId}`)
+                }
+            })
         })
         /* Working Zone End */
         // Send a ping to confirm a successful connection
