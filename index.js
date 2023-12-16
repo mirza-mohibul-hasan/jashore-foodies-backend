@@ -92,6 +92,7 @@ async function run() {
                 return res.send({ message: 'already exists' })
             }
             const result = await usersCollection.insertOne(user);
+            // console.log(result)
             res.send(result);
         });
 
@@ -115,12 +116,21 @@ async function run() {
             const result = restaurant?.status === 'approved'
             res.send(result);
         })
-        // Add New Item
+        // Add New Table
         app.post("/addtable", async (req, res) => {
             const newTable = req.body;
             const result = await tableCollection.insertOne(newTable)
             res.send(result)
-            // console.log(newTable);
+        })
+        // My Tables
+        app.get("/mytables/:email", async (req, res) => {
+            const result = await tableCollection.find({ restaurantEmail: req.params.email }).toArray();
+            res.send(result)
+        })
+        // My Items
+        app.get("/myitems/:email", async (req, res) => {
+            const result = await itemsCollection.find({ restaurantEmail: req.params.email }).toArray();
+            res.send(result)
         })
         // Add New item
         app.post("/additem", async (req, res) => {
