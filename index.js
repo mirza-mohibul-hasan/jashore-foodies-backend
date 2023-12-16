@@ -92,9 +92,20 @@ async function run() {
                 return res.send({ message: 'already exists' })
             }
             const result = await usersCollection.insertOne(user);
-            // console.log(result)
             res.send(result);
         });
+        // Table Details for Payment Page
+        app.get("/tabledetails/:tableId", async (req, res) => {
+            const tableId = req.params.tableId;
+            const result = await tableCollection.findOne({ _id: new ObjectId(tableId) })
+            res.send(result);
+        })
+        // Customer Details for Payment Page
+        app.get("/customerdetails/:userEmail", async (req, res) => {
+            const userEmail = req.params.userEmail;
+            const result = await usersCollection.findOne({ email: userEmail })
+            res.send(result);
+        })
 
         /* Restaurant Related API */
         // Restaurant register
