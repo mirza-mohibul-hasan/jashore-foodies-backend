@@ -63,7 +63,9 @@ async function run() {
         const reservationspaymentsCollection = db.collection("reservationspayments");
         const userPaymenthistoryCollection = db.collection("userpaymenthistory");
         const restaurantPaymentHistoryCollection = db.collection("restaurantpaymenthistory");
-
+        // order currentfoodorder
+        const currentOrderCollection = db.collection("currentfoodorder")
+        const orderHistoryCollection = db.collection("foodorderhistory")
         // JWT Token
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -293,6 +295,7 @@ async function run() {
                 customerName: info.name,
                 customerContact: info.phone,
                 table,
+                amount: (table?.price * .50).toFixed(2),
                 restaurantEmail: table.restaurantEmail,
                 time: new Date()
             }
@@ -369,6 +372,152 @@ async function run() {
                 }
             })
             app.post("/reservationpayment/failed/:tranId", async (req, res) => {
+                // console.log(req.params.tranId);
+                const result = await reservationspaymentsCollection.deleteOne({ transactionId: req.params.tranId })
+                if (result.deletedCount > 0) {
+                    res.redirect(`http://localhost:5173/payment/failed/${req.params.tranId}`)
+                }
+            })
+        })
+        app.post("/foodpayment", async (req, res) => {
+            const info = req.body;
+            const items = info.items;
+            const customer = info.customer;
+            const data = {
+                total_amount: info.totalPrice,
+                currency: info.currency,
+                tran_id: tran_id, // use unique tran_id for each api call
+                success_url: `http://localhost:3000/foodpayment/success/${tran_id}`,
+                fail_url: `http://localhost:3000/foodpayment/failed/${tran_id}`,
+                cancel_url: 'http://localhost:3030/cancel',
+                ipn_url: 'http://localhost:3030/ipn',
+                shipping_method: 'Courier',
+                product_name: 'Food',
+                product_category: "Random",
+                product_profile: 'general',
+                cus_name: info.name,
+                cus_email: customer.email,
+                cus_add1: info.address,
+                cus_add2: 'Dhaka',
+                cus_city: 'Dhaka',
+                cus_state: 'Dhaka',
+                cus_postcode: info.postcode,
+                cus_country: 'Bangladesh',
+                cus_phone: info.phone,
+                cus_fax: '01711111111',
+                ship_name: info.name,
+                ship_add1: 'Dhaka',
+                ship_add2: 'Dhaka',
+                ship_city: 'Dhaka',
+                ship_state: 'Dhaka',
+                ship_postcode: 1000,
+                ship_country: 'Bangladesh',
+            };
+            // const newCurrentOrder = {
+            //     customerId: customer._id,
+            //     customerEmail: customer.email,
+            //     customerName: info.name,
+            //     customerContact: info.phone,
+            //     items,
+            //     time: new Date()
+            // }
+
+            // const newRestaurantPaymentHistory = {
+            //     tranId: tran_id,
+            //     currency: info.currency,
+            //     itemType: "food",
+            //     customerEmail: customer.email,
+            //     customerId: customer._id,
+            //     customerName: info.name,
+            //     amount: info.totalPrice,
+            //     items,
+            //     time: new Date()
+            // }
+
+
+            const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+            sslcz.init(data).then(apiResponse => {
+                // Redirect the user to payment gateway
+                let GatewayPageURL = apiResponse.GatewayPageURL
+                // res.redirect(GatewayPageURL)
+                res.send({ url: GatewayPageURL });
+
+                // Transaction Info for user
+                const paymentInfo = {
+                    paymentStatus: false,
+                    amount: info.totalPrice,
+                    transactionId: tran_id,
+                    items,
+                    customerId: customer._id,
+                    customerEmail: customer.email,
+                    customerName: customer.name
+                }
+                const result = reservationspaymentsCollection.insertOne(paymentInfo)
+
+                console.log('Redirecting to: ', GatewayPageURL)
+            });
+            app.post("/foodpayment/success/:tranId", async (req, res) => {
+                // console.log(req.params.tranId);
+                const result = await reservationspaymentsCollection.updateOne({ transactionId: req.params.tranId }, {
+                    $set: {
+                        paymentStatus: true
+                    }
+                })
+                if (result.modifiedCount > 0) {
+                    info.items.map(item => {
+                        const newCurrentOrder = {
+                            customerId: customer._id,
+                            customerEmail: customer.email,
+                            customerName: info.name,
+                            customerContact: info.phone,
+                            item: item.item,
+                            amount: item.item.price - ((item.item.price * item.item.offer) / 100.0).toFixed(2),
+                            restaurantEmail: item.item.restaurantEmail,
+                            time: new Date()
+                        }
+                        const newUserPaymentHistory = {
+                            tranId: tran_id,
+                            currency: info.currency,
+                            itemType: "food",
+                            amount: item.item.price - ((item.item.price * item.item.offer) / 100.0).toFixed(2),
+                            item: item.item,
+                            restaurantEmail: item.item.restaurantEmail,
+                            customerId: customer._id,
+                            customerEmail: customer.email,
+                            time: new Date()
+                        }
+                        const newRestaurantPaymentHistory = {
+                            tranId: tran_id,
+                            currency: info.currency,
+                            itemType: "food",
+                            customerEmail: customer.email,
+                            customerId: customer._id,
+                            customerName: info.name,
+                            amount: item.item.price - ((item.item.price * item.item.offer) / 100.0).toFixed(2),
+                            item: item.item,
+                            restaurantEmail: item.item.restaurantEmail,
+                            restaurantName: item.item.restaurantName,
+                            time: new Date()
+                        }
+                        currentOrderCollection.insertOne(newCurrentOrder);
+                        userPaymenthistoryCollection.insertOne(newUserPaymentHistory)
+                        restaurantPaymentHistoryCollection.insertOne(newRestaurantPaymentHistory)
+                        orderHistoryCollection.insertOne(newCurrentOrder)
+                        itemsCollection.updateOne({ _id: new ObjectId(item.item._id) }, {
+                            $set: {
+                                sold: item.item.sold +1
+                            }
+                        })
+                    })
+                    // currentReservationCollection.insertOne(newCurrentReservation);
+                    // userPaymenthistoryCollection.insertOne(newUserPaymentHistory)
+                    // restaurantPaymentHistoryCollection.insertOne(newRestaurantPaymentHistory)
+                    // reservationHistoryCollection.insertOne(newCurrentReservation)
+                    cartCollection.deleteMany({ customerEmail: customer.email })
+                    res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
+                }
+            })
+            app.post("/foodpayment/failed/:tranId", async (req, res) => {
                 // console.log(req.params.tranId);
                 const result = await reservationspaymentsCollection.deleteOne({ transactionId: req.params.tranId })
                 if (result.deletedCount > 0) {
