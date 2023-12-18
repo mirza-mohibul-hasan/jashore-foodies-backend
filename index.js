@@ -46,16 +46,21 @@ async function run() {
 
         /* Working Zone Start */
         // Collections
-        const usersCollection = client.db("jashoreFoodiesDB").collection("users");
-        const restaurantsCollection = client.db("jashoreFoodiesDB").collection("restaurants");
-        const restaurantFeedbackCollection = client.db("jashoreFoodiesDB").collection("authorityrestaurantfeedback");
-        const adminsCollection = client.db("jashoreFoodiesDB").collection("admins");
+        const db = client.db("jashoreFoodiesDB")
+        const usersCollection = db.collection("users");
+        const restaurantsCollection = db.collection("restaurants");
+        const restaurantFeedbackCollection = db.collection("authorityrestaurantfeedback");
+        const adminsCollection = db.collection("admins");
         // Restaurant
-        const itemsCollection = client.db("jashoreFoodiesDB").collection("fooditems");
-        const tableCollection = client.db("jashoreFoodiesDB").collection("restauranttables");
-
+        const itemsCollection = db.collection("fooditems");
+        const tableCollection = db.collection("restauranttables");
+        // Reservations
+        const currentReservationCollection = db.collection("currentreservation")
+        const reservationHistoryCollection = db.collection("reservationhistory")
         // Payments
-        const reservationspaymentsCollection = client.db("jashoreFoodiesDB").collection("reservationspayments");
+        const reservationspaymentsCollection = db.collection("reservationspayments");
+        const userPaymenthistoryCollection = db.collection("userpaymenthistory");
+        const restaurantPaymentHistoryCollection = db.collection("restaurantpaymenthistory");
 
         // JWT Token
         app.post('/jwt', (req, res) => {
@@ -111,6 +116,18 @@ async function run() {
         app.get("/customerdetails/:userEmail", async (req, res) => {
             const userEmail = req.params.userEmail;
             const result = await usersCollection.findOne({ email: userEmail })
+            res.send(result);
+        })
+        // my reservations
+        app.get("/myreservations/:customerEmail", async (req, res) => {
+            const customerEmail = req.params.customerEmail;
+            const result = await currentReservationCollection.find({ customerEmail: customerEmail }).toArray();
+            res.send(result);
+        })
+        // payment history
+        app.get("/paymenthistory/:userEmail", async (req, res) => {
+            const userEmail = req.params.userEmail;
+            const result = await reservationspaymentsCollection.find({ customerEmail: userEmail }).toArray();
             res.send(result);
         })
 
@@ -234,7 +251,43 @@ async function run() {
                 ship_postcode: 1000,
                 ship_country: 'Bangladesh',
             };
-            // console.log(data);
+            // console.log(info)
+            const newCurrentReservation = {
+                customerId: customer._id,
+                customerEmail: customer.email,
+                customerName: info.name,
+                customerContact: info.phone,
+                table,
+                restaurantEmail: table.restaurantEmail,
+                time: new Date()
+            }
+            const newUserPaymentHistory = {
+                tranId: tran_id,
+                currency: info.currency,
+                itemType: "table",
+                amount: (table?.price * .50).toFixed(2),
+                table,
+                restaurantEmail: table.restaurantEmail,
+                table,
+                time: new Date()
+            }
+            const newRestaurantPaymentHistory = {
+                tranId: tran_id,
+                currency: info.currency,
+                itemType: "table",
+                customerEmail: customer.email,
+                customerName: info.name,
+                amount: (table?.price * .50).toFixed(2),
+                table,
+                restaurantEmail: table.restaurantEmail,
+                restaurantId: table.restaurantId,
+                restaurantName: table.restaurantName,
+                time: new Date()
+            }
+            // console.log(newCurrentReservation)
+            // console.log(newUserPaymentHistory)
+            // console.log(newRestaurantPaymentHistory)
+
             const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
             sslcz.init(data).then(apiResponse => {
                 // Redirect the user to payment gateway
@@ -266,6 +319,15 @@ async function run() {
                     }
                 })
                 if (result.modifiedCount > 0) {
+                    currentReservationCollection.insertOne(newCurrentReservation);
+                    userPaymenthistoryCollection.insertOne(newUserPaymentHistory)
+                    restaurantPaymentHistoryCollection.insertOne(newRestaurantPaymentHistory)
+                    reservationHistoryCollection.insertOne(newCurrentReservation)
+                    tableCollection.updateOne({ _id: new ObjectId(table._id) }, {
+                        $set: {
+                            availability: false
+                        }
+                    })
                     res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
                 }
             })
