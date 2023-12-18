@@ -121,13 +121,15 @@ async function run() {
         // my reservations
         app.get("/myreservations/:customerEmail", async (req, res) => {
             const customerEmail = req.params.customerEmail;
-            const result = await currentReservationCollection.find({ customerEmail: customerEmail }).toArray();
+            const result1 = await currentReservationCollection.find({ customerEmail: customerEmail }).toArray();
+            const result2 = await reservationHistoryCollection.find({ customerEmail: customerEmail }).toArray();
+            const result = { result1, result2 }
             res.send(result);
         })
         // payment history
-        app.get("/paymenthistory/:userEmail", async (req, res) => {
-            const userEmail = req.params.userEmail;
-            const result = await reservationspaymentsCollection.find({ customerEmail: userEmail }).toArray();
+        app.get("/userpaymenthistory/:customerEmail", async (req, res) => {
+            const customerEmail = req.params.customerEmail;
+            const result = await userPaymenthistoryCollection.find({ customerEmail: customerEmail }).toArray();
             res.send(result);
         })
 
@@ -173,6 +175,14 @@ async function run() {
             const result = await itemsCollection.insertOne(newItem)
             res.send(result)
             // console.log(newItem);
+        })
+        // tablereservations
+        app.get("/tablereservations/:restaurantEmail", async (req, res) => {
+            const restaurantEmail = req.params.restaurantEmail;
+            const result1 = await currentReservationCollection.find({ restaurantEmail: restaurantEmail }).toArray();
+            const result2 = await reservationHistoryCollection.find({ restaurantEmail: restaurantEmail }).toArray();
+            const result = { result1, result2 }
+            res.send(result);
         })
         /* Admin Related Api */
         app.get('/pendingrestaurnt', async (req, res) => {
@@ -268,7 +278,8 @@ async function run() {
                 amount: (table?.price * .50).toFixed(2),
                 table,
                 restaurantEmail: table.restaurantEmail,
-                table,
+                customerId: customer._id,
+                customerEmail: customer.email,
                 time: new Date()
             }
             const newRestaurantPaymentHistory = {
@@ -276,6 +287,7 @@ async function run() {
                 currency: info.currency,
                 itemType: "table",
                 customerEmail: customer.email,
+                customerId: customer._id,
                 customerName: info.name,
                 amount: (table?.price * .50).toFixed(2),
                 table,
