@@ -57,6 +57,8 @@ async function run() {
         // Reservations
         const currentReservationCollection = db.collection("currentreservation")
         const reservationHistoryCollection = db.collection("reservationhistory")
+        // User
+        const cartCollection = db.collection("carts")
         // Payments
         const reservationspaymentsCollection = db.collection("reservationspayments");
         const userPaymenthistoryCollection = db.collection("userpaymenthistory");
@@ -93,6 +95,11 @@ async function run() {
             const restaurantId = req.params.restaurantId;
             const result = await restaurantsCollection.findOne({ _id: new ObjectId(restaurantId) })
             res.send(result);
+        })
+        //all items
+        app.get("/allitems", async (req, res) => {
+            const result = await itemsCollection.find().toArray()
+            res.send(result)
         })
 
         /* Customer Related API*/
@@ -133,6 +140,24 @@ async function run() {
             res.send(result);
         })
 
+        // Cart
+        app.post('/carts', async (req, res) => {
+            const item = req.body;
+            const result = await cartCollection.insertOne(item);
+            res.send(result);
+        })
+        app.get('/carts/:customerEmail', async (req, res) => {
+            const customerEmail = req.params.customerEmail;
+
+            const result = await cartCollection.find({ customerEmail: customerEmail }).toArray();
+            res.send(result);
+        });
+        app.delete('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            // const query = { _id: new ObjectId(id) };
+            // const result = await cartCollection.deleteOne(query);
+            // res.send(result);
+        })
         /* Restaurant Related API */
         // Restaurant register
         app.post('/restaurants', async (req, res) => {

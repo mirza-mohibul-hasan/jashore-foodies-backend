@@ -60,4 +60,127 @@
       "restaurantEmail": "cafetest@gmail.com"
     }
   ]
-  
+
+
+[
+  {
+    "name": "Spicy Chicken Curry",
+    "price": 85.0,
+    "cusinetype": "Indian",
+    "ingredients": {"ing1": "Chicken", "ing2": "Spices", "ing3": "Tomatoes"},
+    "description": "A flavorful and spicy chicken curry that will tantalize your taste buds...",
+    "photo": "https://realfood.tesco.com/media/images/RFO-1400x919-DavidsCurry-03186c71-75ff-4976-bf1f-24ca8c9aa06c-0-1400x919.jpg",
+    "date": "2023-12-19T12:30:45.123Z",
+    "availability": true,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 35.5,
+    "rating": 4.5,
+    "sold": 5
+  },
+  {
+    "name": "Vegetable Biryani",
+    "price": 75.0,
+    "cusinetype": "Indian",
+    "ingredients": {"ing1": "Rice", "ing2": "Vegetables", "ing3": "Spices"},
+    "description": "A delightful blend of aromatic rice and mixed vegetables...",
+    "photo": "https://www.archanaskitchen.com/images/archanaskitchen/1-Author/sandhya-archanaskitchen.com/Chettinad_Vegetable_Biryani_Recipe.jpg",
+    "date": "2023-12-20T19:45:15.234Z",
+    "availability": false,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 0,
+    "rating": 0,
+    "sold": 0
+  },
+  {
+    "name": "Butter Chicken",
+    "price": 80.0,
+    "cusinetype": "Indian",
+    "ingredients": {"ing1": "Chicken", "ing2": "Butter", "ing3": "Cream"},
+    "description": "Creamy and rich butter chicken, a classic Indian dish...",
+    "photo": "https://www.spiceroots.com/spiceroots/wp-content/uploads/2008/05/butterchicken-1024x682-1.jpg",
+    "date": "2023-12-21T10:10:05.543Z",
+    "availability": false,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 20,
+    "rating": 0,
+    "sold": 0
+  },
+  {
+    "name": "Chana Masala",
+    "price": 60.0,
+    "cusinetype": "Indian",
+    "ingredients": {"ing1": "Chickpeas", "ing2": "Tomatoes", "ing3": "Spices"},
+    "description": "A flavorful and hearty chickpea curry, perfect for vegetarians...",
+    "photo": "https://www.oliveandmango.com/images/uploads/2023_01_25_creamy_chana_masala_1.jpg",
+    "date": "2023-12-22T15:30:40.876Z",
+    "availability": true,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 0,
+    "rating": 4.3,
+    "sold": 5
+  },
+  {
+    "name": "Aloo Paratha",
+    "price": 55.0,
+    "cusinetype": "Indian",
+    "ingredients": {"ing1": "Potatoes", "ing2": "Wheat flour", "ing3": "Spices"},
+    "description": "Delicious stuffed potato flatbreads, a breakfast favorite...",
+    "photo": "https://static.toiimg.com/thumb/53109843.cms?width=1200&height=900",
+    "date": "2023-12-23T12:15:25.678Z",
+    "availability": true,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 0,
+    "rating": 0,
+    "sold": 0
+  },
+  {
+    "name": "Veg Spring Rolls",
+    "price": 50.0,
+    "cusinetype": "Chinese",
+    "ingredients": {"ing1": "Vegetables", "ing2": "Spring roll sheets", "ing3": "Sauce"},
+    "description": "Crispy and flavorful vegetable spring rolls...",
+    "photo": "https://www.cubesnjuliennes.com/wp-content/uploads/2021/01/Spring-Roll-Recipe-500x375.jpg",
+    "date": "2023-12-24T18:50:55.432Z",
+    "availability": false,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 0,
+    "rating": 0,
+    "sold": 0
+  },
+  {
+    "name": "Sushi Rolls",
+    "price": 90.0,
+    "cusinetype": "Japanese",
+    "ingredients": {"ing1": "Rice", "ing2": "Fish", "ing3": "Seaweed"},
+    "description": "Fresh and delightful sushi rolls with a variety of fillings...",
+    "photo": "https://www.pressurecookrecipes.com/wp-content/uploads/2021/02/california-roll.jpg",
+    "date": "2023-12-25T14:05:35.789Z",
+    "availability": true,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 5,
+    "rating": 4.8,
+    "sold": 12
+  },
+  {
+    "name": "Margherita Pizza",
+    "price": 75.0,
+    "cusinetype": "Italian",
+    "ingredients": {"ing1": "Tomato", "ing2": "Mozzarella", "ing3": "Basil"},
+    "description": "Classic Margherita pizza with a thin crust and fresh ingredients...",
+    "photo": "https://example.com/margherita-pizza.jpg",
+    "date": "2023-12-26T20:20:15.567Z",
+    "availability": true,
+    "restaurantName": "Cafe Test",
+    "restaurantEmail": "cafetest@gmail.com",
+    "offer": 5,
+    "rating": 0,
+    "sold": 0
+  }
+]
