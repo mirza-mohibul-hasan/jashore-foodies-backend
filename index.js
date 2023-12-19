@@ -103,6 +103,16 @@ async function run() {
             const result = await itemsCollection.find().toArray()
             res.send(result)
         })
+        // Bigg offers
+        app.get("/bigoffers", async (req, res) => {
+            const result = await itemsCollection
+                .find({ offer: { $gt: 0 } })
+                .sort({ offer: -1 })
+                .limit(4)
+                .toArray();
+
+            res.send(result);
+        })
 
         /* Customer Related API*/
         app.post('/users', async (req, res) => {
@@ -132,6 +142,14 @@ async function run() {
             const customerEmail = req.params.customerEmail;
             const result1 = await currentReservationCollection.find({ customerEmail: customerEmail }).toArray();
             const result2 = await reservationHistoryCollection.find({ customerEmail: customerEmail }).toArray();
+            const result = { result1, result2 }
+            res.send(result);
+        })
+        // my reservations
+        app.get("/myorders/:customerEmail", async (req, res) => {
+            const customerEmail = req.params.customerEmail;
+            const result1 = await currentOrderCollection.find({ customerEmail: customerEmail }).toArray();
+            const result2 = await orderHistoryCollection.find({ customerEmail: customerEmail }).toArray();
             const result = { result1, result2 }
             res.send(result);
         })
@@ -505,7 +523,7 @@ async function run() {
                         orderHistoryCollection.insertOne(newCurrentOrder)
                         itemsCollection.updateOne({ _id: new ObjectId(item.item._id) }, {
                             $set: {
-                                sold: item.item.sold +1
+                                sold: item.item.sold + 1
                             }
                         })
                     })
