@@ -252,6 +252,23 @@ async function run() {
             res.send(result)
             // console.log(newItem);
         })
+        app.delete("/deleteitem/:id", async (req, res) => {
+            const id = req.params.id;
+            const result = await itemsCollection.deleteOne({ _id: new ObjectId(id) })
+            res.send(result)
+        })
+        // Cancel reservation
+        app.delete("/cancelreservation/:id", async (req, res) => {
+            const id = req.params.id;
+            const result1 = await currentReservationCollection.findOne({ _id: new ObjectId(id) })
+            const result2 = await tableCollection.updateOne({ _id: new ObjectId(result1.table._id) }, {
+                $set: {
+                    availability: true
+                }
+            })
+            const result3 = await currentReservationCollection.deleteOne({_id: new ObjectId(id)})
+            res.send(result3)
+        })
         // tablereservations
         app.get("/tablereservations/:restaurantEmail", async (req, res) => {
             const restaurantEmail = req.params.restaurantEmail;
