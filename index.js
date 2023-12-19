@@ -252,10 +252,21 @@ async function run() {
             res.send(result)
             // console.log(newItem);
         })
+        // delete item
         app.delete("/deleteitem/:id", async (req, res) => {
             const id = req.params.id;
             const result = await itemsCollection.deleteOne({ _id: new ObjectId(id) })
             res.send(result)
+        })
+        // change availability
+        app.patch("/updateitemavailable/:id", async (req, res) => {
+            const result = await itemsCollection.findOne({ _id: new ObjectId(req.params.id) })
+            const result2 = await itemsCollection.updateOne({ _id: new ObjectId(req.params.id) }, {
+                $set: {
+                    availability: !(result.availability)
+                }
+            })
+            res.send(result2)
         })
         // Cancel reservation
         app.delete("/cancelreservation/:id", async (req, res) => {
@@ -266,7 +277,7 @@ async function run() {
                     availability: true
                 }
             })
-            const result3 = await currentReservationCollection.deleteOne({_id: new ObjectId(id)})
+            const result3 = await currentReservationCollection.deleteOne({ _id: new ObjectId(id) })
             res.send(result3)
         })
         // tablereservations
@@ -275,6 +286,36 @@ async function run() {
             const result1 = await currentReservationCollection.find({ restaurantEmail: restaurantEmail }).toArray();
             const result2 = await reservationHistoryCollection.find({ restaurantEmail: restaurantEmail }).toArray();
             const result = { result1, result2 }
+            res.send(result);
+        })
+        // currentorders
+        app.get("/currentorders/:restaurantEmail", async (req, res) => {
+            const restaurantEmail = req.params.restaurantEmail;
+            const result = await currentOrderCollection.find({ restaurantEmail: restaurantEmail }).toArray();
+
+            res.send(result);
+        })
+        app.delete("/deliveredorder/:id", async (req, res) => {
+            const id = req.params.id;
+            const result1 = await currentOrderCollection.findOne({ _id: new ObjectId(id) })
+            result1.deliveryStatus = "delivered"
+            const result2 = orderHistoryCollection.insertOne(result1)
+            const result3 = await currentOrderCollection.deleteOne({ _id: new ObjectId(id) })
+            res.send(result3);
+        })
+        app.delete("/cancelorder/:id", async (req, res) => {
+            const id = req.params.id;
+            const result1 = await currentOrderCollection.findOne({ _id: new ObjectId(id) })
+            result1.deliveryStatus = "cancelled"
+            const result2 = orderHistoryCollection.insertOne(result1)
+            const result3 = await currentOrderCollection.deleteOne({ _id: new ObjectId(id) })
+            res.send(result3);
+        })
+        // Order History
+        app.get("/orderhistory/:restaurantEmail", async (req, res) => {
+            const restaurantEmail = req.params.restaurantEmail;
+            const result = await orderHistoryCollection.find({ restaurantEmail: restaurantEmail }).toArray();
+
             res.send(result);
         })
         /* Admin Related Api */
@@ -530,7 +571,7 @@ async function run() {
                     }
                 })
                 if (result.modifiedCount > 0) {
-                    info.items.map(item => {
+                    items.map(item => {
                         const newCurrentOrder = {
                             customerId: customer._id,
                             customerEmail: customer.email,
@@ -539,7 +580,9 @@ async function run() {
                             item: item.item,
                             amount: item.item.price - ((item.item.price * item.item.offer) / 100.0).toFixed(2),
                             restaurantEmail: item.item.restaurantEmail,
-                            time: new Date()
+                            time: new Date(),
+                            instruction: info.instruction,
+                            deliveryStatus: "pending"
                         }
                         const newUserPaymentHistory = {
                             tranId: tran_id,
@@ -568,17 +611,13 @@ async function run() {
                         currentOrderCollection.insertOne(newCurrentOrder);
                         userPaymenthistoryCollection.insertOne(newUserPaymentHistory)
                         restaurantPaymentHistoryCollection.insertOne(newRestaurantPaymentHistory)
-                        orderHistoryCollection.insertOne(newCurrentOrder)
+                        // orderHistoryCollection.insertOne(newCurrentOrder)
                         itemsCollection.updateOne({ _id: new ObjectId(item.item._id) }, {
                             $set: {
                                 sold: item.item.sold + 1
                             }
                         })
                     })
-                    // currentReservationCollection.insertOne(newCurrentReservation);
-                    // userPaymenthistoryCollection.insertOne(newUserPaymentHistory)
-                    // restaurantPaymentHistoryCollection.insertOne(newRestaurantPaymentHistory)
-                    // reservationHistoryCollection.insertOne(newCurrentReservation)
                     cartCollection.deleteMany({ customerEmail: customer.email })
                     res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
                 }
