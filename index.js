@@ -113,6 +113,25 @@ async function run() {
 
             res.send(result);
         })
+        // New Items
+        app.get("/newitems", async (req, res) => {
+            const result = await itemsCollection
+                .find()
+                .sort({ date: -1 })
+                .limit(4)
+                .toArray();
+
+            res.send(result);
+        })
+        app.get("/trending", async (req, res) => {
+            const result = await itemsCollection
+                .find()
+                .sort({ sold: -1 })
+                .limit(4)
+                .toArray();
+
+            res.send(result);
+        })
 
         /* Customer Related API*/
         app.post('/users', async (req, res) => {
