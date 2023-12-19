@@ -103,7 +103,19 @@ async function run() {
             const result = await itemsCollection.find().toArray()
             res.send(result)
         })
+        // all restaurant
+        app.get("/allrestaurants", async (req, res) => {
+            const result = await restaurantsCollection.find().toArray()
+            res.send(result)
+        })
         // Bigg offers
+        app.get("/offers", async (req, res) => {
+            const result = await itemsCollection
+                .find({ offer: { $gt: 0 } })
+                .toArray();
+
+            res.send(result);
+        })
         app.get("/bigoffers", async (req, res) => {
             const result = await itemsCollection
                 .find({ offer: { $gt: 0 } })
