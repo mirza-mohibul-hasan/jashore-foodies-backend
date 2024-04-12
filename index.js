@@ -369,8 +369,8 @@ async function run() {
                 total_amount: (table?.price * .50).toFixed(2),
                 currency: info.currency,
                 tran_id: tran_id, // use unique tran_id for each api call
-                success_url: `http://localhost:3000/reservationpayment/success/${tran_id}`,
-                fail_url: `http://localhost:3000/reservationpayment/failed/${tran_id}`,
+                success_url: `https://jashore-foodies-backend.vercel.app/reservationpayment/success/${tran_id}`,
+                fail_url: `https://jashore-foodies-backend.vercel.app/reservationpayment/failed/${tran_id}`,
                 cancel_url: 'http://localhost:3030/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
@@ -475,14 +475,14 @@ async function run() {
                             availability: false
                         }
                     })
-                    res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
+                    res.redirect(`https://jashore-foodies-d027d.web.app/payment/success/${req.params.tranId}`)
                 }
             })
             app.post("/reservationpayment/failed/:tranId", async (req, res) => {
                 // console.log(req.params.tranId);
                 const result = await reservationspaymentsCollection.deleteOne({ transactionId: req.params.tranId })
                 if (result.deletedCount > 0) {
-                    res.redirect(`http://localhost:5173/payment/failed/${req.params.tranId}`)
+                    res.redirect(`https://jashore-foodies-d027d.web.app/payment/failed/${req.params.tranId}`)
                 }
             })
         })
@@ -494,8 +494,8 @@ async function run() {
                 total_amount: info.totalPrice,
                 currency: info.currency,
                 tran_id: tran_id, // use unique tran_id for each api call
-                success_url: `http://localhost:3000/foodpayment/success/${tran_id}`,
-                fail_url: `http://localhost:3000/foodpayment/failed/${tran_id}`,
+                success_url: `https://jashore-foodies-backend.vercel.app/foodpayment/success/${tran_id}`,
+                fail_url: `https://jashore-foodies-backend.vercel.app/foodpayment/failed/${tran_id}`,
                 cancel_url: 'http://localhost:3030/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
@@ -619,14 +619,14 @@ async function run() {
                         })
                     })
                     cartCollection.deleteMany({ customerEmail: customer.email })
-                    res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
+                    res.redirect(`https://jashore-foodies-d027d.web.app/payment/success/${req.params.tranId}`)
                 }
             })
             app.post("/foodpayment/failed/:tranId", async (req, res) => {
                 // console.log(req.params.tranId);
                 const result = await reservationspaymentsCollection.deleteOne({ transactionId: req.params.tranId })
                 if (result.deletedCount > 0) {
-                    res.redirect(`http://localhost:5173/payment/failed/${req.params.tranId}`)
+                    res.redirect(`https://jashore-foodies-d027d.web.app/payment/failed/${req.params.tranId}`)
                 }
             })
         })
